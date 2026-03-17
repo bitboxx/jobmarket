@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netherlands Job Market Visualizer</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #090c10;
+      --bg2: #11161d;
+      --bg3: #161d27;
+      --fg: #eef2f8;
+      --fg2: #a6b1bf;
+      --border: rgba(255, 255, 255, 0.09);
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, rgba(34, 112, 152, 0.18), transparent 30%),
+        linear-gradient(180deg, #0a0d11 0%, #080b10 100%);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    #wrapper {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 18px 64px;
+    }
+
+    #header {
+      margin-bottom: 18px;
+    }
+
+    .intro {
+      padding: 10px 8px 20px;
+    }
+
+    .eyebrow {
+      color: #7db5cf;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .intro h1 {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 30px;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+    }
+
+    .intro h1 a {
+      color: var(--fg2);
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .intro h1 a:hover,
+    .intro p a:hover,
+    summary:hover {
+      color: var(--fg);
+      text-decoration: underline;
+    }
+
+    .intro p {
+      color: var(--fg2);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 8px;
+      max-width: 1120px;
+    }
+
+    .intro strong {
+      color: var(--fg);
+      font-weight: 650;
+    }
+
+    details {
+      margin-top: 12px;
+      max-width: 1120px;
+    }
+
+    summary {
+      color: var(--fg2);
+      cursor: pointer;
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .notes-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-top: 10px;
+      padding: 12px 14px;
+    }
+
+    .notes-box p,
+    .notes-box li {
+      color: var(--fg2);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .notes-box ul {
+      list-style: none;
+      margin-top: 8px;
+    }
+
+    .stats-grid,
+    .insights-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .stat-card,
+    .insight-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      min-height: 108px;
+      padding: 14px 16px;
+    }
+
+    .stat-card .label,
+    .insight-card .label {
+      color: var(--fg2);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .stat-card .value {
+      font-size: 29px;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .detail,
+    .insight-card .detail {
+      color: var(--fg2);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .insight-card .value {
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 7px;
+    }
+
+    .controls-row {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      margin-bottom: 18px;
+      padding: 4px 2px;
+    }
+
+    .mode-toggle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .mode-toggle button {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--fg2);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 13px;
+      transition: 140ms ease;
+    }
+
+    .mode-toggle button:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--fg);
+    }
+
+    .mode-toggle button.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.18);
+      color: var(--fg);
+    }
+
+    .legend {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .legend-label {
+      color: var(--fg2);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .legend-bar {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+      width: 120px;
+    }
+
+    #canvas-shell {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 8px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+    }
+
+    #tooltip {
+      background: rgba(12, 16, 23, 0.97);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      max-width: 340px;
+      opacity: 0;
+      padding: 14px 16px;
+      pointer-events: none;
+      position: fixed;
+      transition: opacity 120ms ease;
+      z-index: 50;
+    }
+
+    #tooltip.visible {
+      opacity: 1;
+    }
+
+    #tooltip .title {
+      font-size: 16px;
+      font-weight: 650;
+      line-height: 1.25;
+      margin-bottom: 5px;
+    }
+
+    #tooltip .subhead {
+      color: var(--fg2);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    #tooltip .highlight {
+      border-radius: 999px;
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 650;
+      margin-bottom: 10px;
+      padding: 4px 9px;
+    }
+
+    #tooltip .grid {
+      column-gap: 10px;
+      display: grid;
+      grid-template-columns: auto auto;
+      row-gap: 5px;
+    }
+
+    #tooltip .grid .k {
+      color: var(--fg2);
+      font-size: 12px;
+    }
+
+    #tooltip .grid .v {
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .loading {
+      color: var(--fg2);
+      font-size: 15px;
+      padding: 36px 8px;
+    }
+
+    @media (max-width: 1200px) {
+      .stats-grid,
+      .insights-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 860px) {
+      #wrapper {
+        padding: 18px 12px 44px;
+      }
+
+      .intro h1 {
+        font-size: 24px;
+      }
+
+      .stats-grid,
+      .insights-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .legend {
+        margin-left: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .stats-grid,
+      .insights-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .stat-card,
+      .insight-card {
+        min-height: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper">
+    <header id="header">
+      <div class="intro">
+        <div class="eyebrow">CBS Open Data</div>
+        <h1>
+          Netherlands Job Market Visualizer
+          <a href="https://karpathy.ai/jobs/" target="_blank" rel="noreferrer">Inspired by karpathy.ai/jobs</a>
+          <a href="https://dataportal.cbs.nl/detail/CBS/nl/dataset/85276NED" target="_blank" rel="noreferrer">85276NED</a>
+          <a href="https://dataportal.cbs.nl/detail/CBS/nl/dataset/85517NED" target="_blank" rel="noreferrer">85517NED</a>
+        </h1>
+        <p>
+          A Dutch remake of the US job treemap, built from <strong>official CBS open data</strong>. Each rectangle is a 4-digit occupational group,
+          and each area is proportional to the number of people working in that occupation.
+        </p>
+        <p>
+          Employment now uses the latest quarter available, <strong>2025 Q4</strong>. Color switches between <strong>Q4-to-Q4 employment growth</strong>,
+          <strong>median hourly pay</strong>, <strong>women share</strong>, and <strong>higher-education share</strong>. Pay remains <strong>2024 annual</strong>
+          because that CBS wage table is less current.
+        </p>
+        <details>
+          <summary>Method and source notes</summary>
+          <div class="notes-box" id="notesBox"></div>
+        </details>
+      </div>
+
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <div class="controls-row">
+        <div class="mode-toggle" id="modeToggle">
+          <button data-mode="growth" class="active">Q4→Q4 Growth</button>
+          <button data-mode="pay">Median Hourly Pay</button>
+          <button data-mode="women">Women Share</button>
+          <button data-mode="education">Higher Education</button>
+        </div>
+        <div class="legend">
+          <span class="legend-label" id="legendLeft"></span>
+          <div class="legend-bar" id="legendBar"></div>
+          <span class="legend-label" id="legendRight"></span>
+        </div>
+      </div>
+
+      <div class="insights-grid" id="insightsGrid"></div>
+    </header>
+
+    <div id="canvas-shell">
+      <div class="loading" id="loading">Loading CBS occupation data…</div>
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <script>
+    const state = {
+      meta: null,
+      data: [],
+      categoryRects: [],
+      rects: [],
+      hovered: null,
+      colorMode: "growth",
+      dpr: window.devicePixelRatio || 1,
+    };
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const tooltip = document.getElementById("tooltip");
+    const loadingEl = document.getElementById("loading");
+
+    const MARGIN = 14;
+    const TILE_GAP = 3;
+    const OUTER_GAP = 10;
+
+    const MODE_CONFIG = {
+      growth: {
+        label: "Q4→Q4 Growth",
+        metricLabel: "Growth from 2024 Q4 to 2025 Q4",
+        legendLeft: "Decline",
+        legendRight: "Faster growth",
+        legendGradient: "linear-gradient(90deg, #a73539 0%, #d7b4a5 42%, #cfd6d9 50%, #8dc3bc 70%, #1c7f68 100%)",
+        value: (d) => d.growth1y,
+        subtitle: (d) => d.growth1y == null ? "No 2024 Q4 comparison" : `${formatSignedPercent(d.growth1y)} vs 2024 Q4`,
+        format: (v) => v == null ? "—" : formatSignedPercent(v),
+        color: (d, alpha = 1) => {
+          const v = d.growth1y;
+          if (v == null) return rgba(110, 118, 128, alpha);
+          if (v < 0) {
+            const t = clamp(v, -30, 0) / -30;
+            return ramp(["#a73539", "#d06e63", "#d7b4a5"], 1 - t, alpha);
+          }
+          const t = clamp(v, 0, 60) / 60;
+          return ramp(["#cfd6d9", "#89c7be", "#1c7f68"], t, alpha);
+        },
+      },
+      pay: {
+        label: "Median Hourly Pay",
+        metricLabel: "Median hourly pay",
+        legendLeft: "Lower pay",
+        legendRight: "Higher pay",
+        legendGradient: "linear-gradient(90deg, #90512f 0%, #d1ae6d 45%, #ced8dc 60%, #66c8f0 100%)",
+        value: (d) => d.medianHourlyPay,
+        subtitle: (d) => d.medianHourlyPay == null ? "Pay unavailable" : `${formatCurrency(d.medianHourlyPay)}/hour median`,
+        format: (v) => v == null ? "—" : `${formatCurrency(v)}/h`,
+        color: (d, alpha = 1) => {
+          const v = d.medianHourlyPay;
+          if (v == null) return rgba(110, 118, 128, alpha);
+          const t = clamp(v, 11, 46) / 46;
+          return ramp(["#90512f", "#d1ae6d", "#cfdde4", "#66c8f0"], clamp((v - 11) / (46 - 11), 0, 1), alpha);
+        },
+      },
+      women: {
+        label: "Women Share",
+        metricLabel: "Women share",
+        legendLeft: "More men",
+        legendRight: "More women",
+        legendGradient: "linear-gradient(90deg, #4f81d9 0%, #b5cae9 35%, #d5d8dc 50%, #efb0c0 66%, #df577f 100%)",
+        value: (d) => d.womenShare,
+        subtitle: (d) => d.womenShare == null ? "Share unavailable" : `${formatPercent(d.womenShare)} women`,
+        format: (v) => v == null ? "—" : formatPercent(v),
+        color: (d, alpha = 1) => {
+          const v = d.womenShare;
+          if (v == null) return rgba(110, 118, 128, alpha);
+          if (v < 0.5) {
+            const t = clamp(v, 0, 0.5) / 0.5;
+            return ramp(["#4f81d9", "#b5cae9", "#d5d8dc"], t, alpha);
+          }
+          const t = (clamp(v, 0.5, 1) - 0.5) / 0.5;
+          return ramp(["#d5d8dc", "#efb0c0", "#df577f"], t, alpha);
+        },
+      },
+      education: {
+        label: "Higher Education",
+        metricLabel: "Hbo/wo share",
+        legendLeft: "Less hbo/wo",
+        legendRight: "More hbo/wo",
+        legendGradient: "linear-gradient(90deg, #78614f 0%, #b59f8b 32%, #bfd8d1 65%, #48bca1 100%)",
+        value: (d) => d.higherEducationShare,
+        subtitle: (d) => d.higherEducationShare == null ? "Share unavailable" : `${formatPercent(d.higherEducationShare)} hbo/wo`,
+        format: (v) => v == null ? "—" : formatPercent(v),
+        color: (d, alpha = 1) => {
+          const v = d.higherEducationShare;
+          if (v == null) return rgba(110, 118, 128, alpha);
+          return ramp(["#78614f", "#b59f8b", "#bfd8d1", "#48bca1"], clamp(v, 0, 0.9) / 0.9, alpha);
+        },
+      },
+    };
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function rgba(r, g, b, a) {
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+
+    function hexToRgb(hex) {
+      const normalized = hex.replace("#", "");
+      const int = Number.parseInt(normalized, 16);
+      return {
+        r: (int >> 16) & 255,
+        g: (int >> 8) & 255,
+        b: int & 255,
+      };
+    }
+
+    function ramp(stops, t, alpha = 1) {
+      const normalized = clamp(t, 0, 1);
+      const scaled = normalized * (stops.length - 1);
+      const index = Math.min(stops.length - 2, Math.floor(scaled));
+      const blend = scaled - index;
+      const from = hexToRgb(stops[index]);
+      const to = hexToRgb(stops[index + 1]);
+      return rgba(
+        Math.round(from.r + (to.r - from.r) * blend),
+        Math.round(from.g + (to.g - from.g) * blend),
+        Math.round(from.b + (to.b - from.b) * blend),
+        alpha,
+      );
+    }
+
+    function formatJobs(value) {
+      if (value == null) return "—";
+      if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+      if (value >= 1_000) return `${Math.round(value / 1_000)}k`;
+      return value.toLocaleString("en-US");
+    }
+
+    function formatCurrency(value) {
+      if (value == null) return "—";
+      return `€${value.toFixed(1)}`;
+    }
+
+    function formatPercent(value) {
+      if (value == null) return "—";
+      return `${Math.round(value * 100)}%`;
+    }
+
+    function formatSignedPercent(value) {
+      if (value == null) return "—";
+      const sign = value > 0 ? "+" : "";
+      return `${sign}${value.toFixed(1)}%`;
+    }
+
+    function squarify(items, x, y, w, h) {
+      if (!items.length || w <= 0 || h <= 0) return [];
+      const total = items.reduce((sum, item) => sum + item.value, 0);
+      if (total <= 0) return [];
+
+      const scaled = items.map((item) => ({
+        ...item,
+        areaValue: (item.value / total) * (w * h),
+      }));
+
+      const results = [];
+      let remaining = [...scaled];
+      let cx = x;
+      let cy = y;
+      let cw = w;
+      let ch = h;
+
+      while (remaining.length) {
+        const shortSide = Math.min(cw, ch);
+        let row = [remaining[0]];
+        let rowSum = remaining[0].areaValue;
+
+        while (remaining.length > row.length) {
+          const candidate = remaining[row.length];
+          const candidateSum = rowSum + candidate.areaValue;
+          if (worstAspect([...row, candidate], candidateSum, shortSide) <= worstAspect(row, rowSum, shortSide)) {
+            row.push(candidate);
+            rowSum = candidateSum;
+          } else {
+            break;
+          }
+        }
+
+        if (cw >= ch) {
+          const rowWidth = rowSum / ch;
+          let offsetY = cy;
+          for (const item of row) {
+            const itemHeight = item.areaValue / rowWidth;
+            results.push({ ...item, rx: cx, ry: offsetY, rw: rowWidth, rh: itemHeight });
+            offsetY += itemHeight;
+          }
+          cx += rowWidth;
+          cw -= rowWidth;
+        } else {
+          const rowHeight = rowSum / cw;
+          let offsetX = cx;
+          for (const item of row) {
+            const itemWidth = item.areaValue / rowHeight;
+            results.push({ ...item, rx: offsetX, ry: cy, rw: itemWidth, rh: rowHeight });
+            offsetX += itemWidth;
+          }
+          cy += rowHeight;
+          ch -= rowHeight;
+        }
+
+        remaining = remaining.slice(row.length);
+      }
+
+      return results;
+    }
+
+    function worstAspect(row, rowSum, shortSide) {
+      if (!row.length || rowSum <= 0 || shortSide <= 0) return Number.POSITIVE_INFINITY;
+      let worst = 0;
+      for (const item of row) {
+        const otherSide = rowSum / shortSide;
+        const itemShort = item.areaValue / otherSide;
+        const aspect = Math.max(otherSide / itemShort, itemShort / otherSide);
+        if (aspect > worst) worst = aspect;
+      }
+      return worst;
+    }
+
+    function updateStaticCards() {
+      const statsGrid = document.getElementById("statsGrid");
+      const { meta } = state;
+      statsGrid.innerHTML = [
+        {
+          label: "Represented Workers",
+          value: formatJobs(meta.totalJobs),
+          detail: `Employed workforce in ${meta.employmentCurrentPeriod}`,
+        },
+        {
+          label: "Occupational Groups",
+          value: meta.occupationCount.toLocaleString("en-US"),
+          detail: "4-digit CBS occupational groups",
+        },
+        {
+          label: "Weighted Median Pay",
+          value: `${formatCurrency(meta.summary.medianHourlyPayWeighted)}/h`,
+          detail: `Employees only, ${meta.payPeriod} median`,
+        },
+        {
+          label: "Women Share",
+          value: formatPercent(meta.summary.womenShareWeighted),
+          detail: "Share of workers who are women",
+        },
+        {
+          label: "Higher Education",
+          value: formatPercent(meta.summary.higherEducationShareWeighted),
+          detail: "Share with hbo or wo",
+        },
+      ].map((card) => `
+        <article class="stat-card">
+          <div class="label">${card.label}</div>
+          <div class="value">${card.value}</div>
+          <div class="detail">${card.detail}</div>
+        </article>
+      `).join("");
+
+      const notesBox = document.getElementById("notesBox");
+      notesBox.innerHTML = `
+        <p>Generated from CBS open data on ${new Date(meta.generatedAt).toLocaleDateString("en-GB", { dateStyle: "long" })}.</p>
+        <ul>
+          ${meta.notes.map((note) => `<li>${note}</li>`).join("")}
+        </ul>
+        <ul>
+          ${meta.sources.map((source) => `<li><a href="${source.url}" target="_blank" rel="noreferrer">${source.table}</a>: ${source.title}</li>`).join("")}
+        </ul>
+      `;
+    }
+
+    function updateInsights() {
+      const cfg = MODE_CONFIG[state.colorMode];
+      const values = state.data.filter((item) => cfg.value(item) != null);
+      const insightsGrid = document.getElementById("insightsGrid");
+      const largest = [...state.data].sort((a, b) => b.jobs - a.jobs)[0];
+      const highest = [...values].sort((a, b) => cfg.value(b) - cfg.value(a))[0];
+      const lowest = [...values].sort((a, b) => cfg.value(a) - cfg.value(b))[0];
+      const weightedAverage = weightedMetric(cfg.value);
+
+      insightsGrid.innerHTML = [
+        {
+          label: "Selected Metric",
+          value: cfg.format(weightedAverage),
+          detail: `Employment-weighted average ${cfg.metricLabel.toLowerCase()}`,
+        },
+        {
+          label: "Highest",
+          value: highest ? highest.title : "—",
+          detail: highest ? `${cfg.metricLabel}: ${cfg.format(cfg.value(highest))}` : "No data",
+        },
+        {
+          label: "Lowest",
+          value: lowest ? lowest.title : "—",
+          detail: lowest ? `${cfg.metricLabel}: ${cfg.format(cfg.value(lowest))}` : "No data",
+        },
+        {
+          label: "Largest Occupation",
+          value: largest ? largest.title : "—",
+          detail: largest ? `${formatJobs(largest.jobs)} workers` : "No data",
+        },
+        {
+          label: "Period Basis",
+          value: `${state.meta.employmentCurrentPeriod}`,
+          detail: `Compared with ${state.meta.employmentComparisonPeriod}; pay is ${state.meta.payPeriod}`,
+        },
+      ].map((card) => `
+        <article class="insight-card">
+          <div class="label">${card.label}</div>
+          <div class="value">${card.value}</div>
+          <div class="detail">${card.detail}</div>
+        </article>
+      `).join("");
+    }
+
+    function weightedMetric(getValue) {
+      let weightedSum = 0;
+      let totalWeight = 0;
+      for (const item of state.data) {
+        const value = getValue(item);
+        if (value == null || item.jobs == null) continue;
+        weightedSum += value * item.jobs;
+        totalWeight += item.jobs;
+      }
+      return totalWeight ? weightedSum / totalWeight : null;
+    }
+
+    function updateLegend() {
+      const cfg = MODE_CONFIG[state.colorMode];
+      document.getElementById("legendLeft").textContent = cfg.legendLeft;
+      document.getElementById("legendRight").textContent = cfg.legendRight;
+      document.getElementById("legendBar").style.background = cfg.legendGradient;
+    }
+
+    function layout() {
+      const shellWidth = document.getElementById("canvas-shell").clientWidth - 16;
+      const width = Math.max(320, shellWidth);
+      const height = Math.max(720, Math.round(width * 0.72));
+
+      canvas.style.height = `${height}px`;
+      canvas.width = Math.floor(width * state.dpr);
+      canvas.height = Math.floor(height * state.dpr);
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+
+      const grouped = groupByCategory(state.data);
+      state.categoryRects = squarify(grouped, MARGIN, MARGIN, width - MARGIN * 2, height - MARGIN * 2);
+      state.rects = [];
+
+      for (const categoryRect of state.categoryRects) {
+        const labelSpace = categoryRect.rw > 140 && categoryRect.rh > 72 ? 20 : 0;
+        const items = [...categoryRect.items].sort((a, b) => b.jobs - a.jobs).map((item) => ({
+          ...item,
+          value: item.jobs,
+        }));
+        const inner = squarify(
+          items,
+          categoryRect.rx + OUTER_GAP / 2,
+          categoryRect.ry + OUTER_GAP / 2 + labelSpace,
+          categoryRect.rw - OUTER_GAP,
+          categoryRect.rh - OUTER_GAP - labelSpace,
+        );
+        for (const rect of inner) {
+          rect.categoryRect = categoryRect;
+          state.rects.push(rect);
+        }
+        categoryRect.labelSpace = labelSpace;
+      }
+    }
+
+    function groupByCategory(data) {
+      const categories = new Map();
+      for (const item of data) {
+        if (!categories.has(item.categoryCode)) {
+          categories.set(item.categoryCode, {
+            categoryCode: item.categoryCode,
+            category: item.category,
+            items: [],
+            value: 0,
+          });
+        }
+        const category = categories.get(item.categoryCode);
+        category.items.push(item);
+        category.value += item.jobs || 0;
+      }
+      return [...categories.values()].sort((a, b) => b.value - a.value);
+    }
+
+    function draw() {
+      const width = canvas.width / state.dpr;
+      const height = canvas.height / state.dpr;
+
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.015)";
+      ctx.fillRect(0, 0, width, height);
+
+      for (const category of state.categoryRects) {
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.025)";
+        roundedRect(ctx, category.rx, category.ry, category.rw, category.rh, 14);
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        if (category.labelSpace > 0) {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.60)";
+          ctx.font = "600 11px system-ui, sans-serif";
+          ctx.textBaseline = "top";
+          ctx.fillText(category.category, category.rx + 10, category.ry + 8);
+        }
+        ctx.restore();
+      }
+
+      for (const rect of state.rects) {
+        const hovered = rect === state.hovered;
+        const x = rect.rx + TILE_GAP / 2;
+        const y = rect.ry + TILE_GAP / 2;
+        const w = rect.rw - TILE_GAP;
+        const h = rect.rh - TILE_GAP;
+
+        if (w <= 0 || h <= 0) continue;
+
+        ctx.save();
+        roundedRect(ctx, x, y, w, h, Math.min(10, Math.max(4, Math.min(w, h) / 6)));
+        ctx.fillStyle = MODE_CONFIG[state.colorMode].color(rect, hovered ? 0.97 : 0.88);
+        ctx.fill();
+
+        ctx.strokeStyle = hovered ? "rgba(255, 255, 255, 0.65)" : "rgba(255, 255, 255, 0.07)";
+        ctx.lineWidth = hovered ? 1.5 : 1;
+        ctx.stroke();
+
+        if (hovered) {
+          ctx.shadowBlur = 24;
+          ctx.shadowColor = "rgba(255, 255, 255, 0.08)";
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+
+        drawTileText(rect, x, y, w, h);
+        ctx.restore();
+      }
+    }
+
+    function roundedRect(context, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      context.beginPath();
+      context.moveTo(x + radius, y);
+      context.arcTo(x + w, y, x + w, y + h, radius);
+      context.arcTo(x + w, y + h, x, y + h, radius);
+      context.arcTo(x, y + h, x, y, radius);
+      context.arcTo(x, y, x + w, y, radius);
+      context.closePath();
+    }
+
+    function drawTileText(rect, x, y, w, h) {
+      const showValueOnly = w < 74 || h < 34;
+      if (showValueOnly) return;
+
+      const titleSize = Math.max(10, Math.min(16, Math.min(w / 8.5, h / 3.5)));
+      const subtitleSize = Math.max(9, Math.min(12, titleSize - 2));
+      const padding = Math.max(8, Math.min(12, Math.min(w, h) / 7));
+
+      ctx.fillStyle = "rgba(10, 13, 18, 0.96)";
+      ctx.font = `650 ${titleSize}px system-ui, sans-serif`;
+      ctx.textBaseline = "top";
+
+      const titleLines = wrapText(rect.title, w - padding * 2, 2, titleSize);
+      let offsetY = y + padding;
+      for (const line of titleLines) {
+        ctx.fillText(line, x + padding, offsetY);
+        offsetY += titleSize * 1.12;
+      }
+
+      if (offsetY > y + h - subtitleSize * 1.5) {
+        return;
+      }
+
+      const sub = MODE_CONFIG[state.colorMode].subtitle(rect);
+      if (!sub) return;
+      ctx.fillStyle = "rgba(10, 13, 18, 0.78)";
+      ctx.font = `600 ${subtitleSize}px system-ui, sans-serif`;
+      ctx.fillText(sub, x + padding, offsetY + 2);
+    }
+
+    function wrapText(text, maxWidth, maxLines, fontSize) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let current = "";
+
+      ctx.save();
+      ctx.font = `650 ${fontSize}px system-ui, sans-serif`;
+
+      for (const word of words) {
+        const test = current ? `${current} ${word}` : word;
+        if (ctx.measureText(test).width <= maxWidth) {
+          current = test;
+        } else if (!current) {
+          lines.push(word);
+          current = "";
+        } else {
+          lines.push(current);
+          current = word;
+        }
+
+        if (lines.length === maxLines) break;
+      }
+
+      if (lines.length < maxLines && current) {
+        lines.push(current);
+      }
+
+      if (lines.length > maxLines) {
+        lines.length = maxLines;
+      }
+
+      if (lines.length === maxLines && words.join(" ") !== lines.join(" ")) {
+        lines[maxLines - 1] = `${lines[maxLines - 1].replace(/\s+\S*$/, "")}…`.trim();
+      }
+
+      ctx.restore();
+      return lines;
+    }
+
+    function hitTest(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      for (let index = state.rects.length - 1; index >= 0; index -= 1) {
+        const item = state.rects[index];
+        if (x >= item.rx && x <= item.rx + item.rw && y >= item.ry && y <= item.ry + item.rh) {
+          return item;
+        }
+      }
+      return null;
+    }
+
+    function updateTooltip(item, clientX, clientY) {
+      if (!item) {
+        tooltip.classList.remove("visible");
+        return;
+      }
+
+      const cfg = MODE_CONFIG[state.colorMode];
+      tooltip.innerHTML = `
+        <div class="title">${item.title}</div>
+        <div class="subhead">${item.category} · ${item.segment}</div>
+        <div class="highlight" style="background:${cfg.color(item, 0.18)}; color:${cfg.color(item, 1)};">
+          ${cfg.metricLabel}: ${cfg.format(cfg.value(item))}
+        </div>
+        <div class="grid">
+          <div class="k">Workers (${state.meta.employmentCurrentPeriod})</div><div class="v">${item.jobs.toLocaleString("en-US")}</div>
+          <div class="k">Growth vs ${state.meta.employmentComparisonPeriod}</div><div class="v">${item.growth1y == null ? "—" : formatSignedPercent(item.growth1y)}</div>
+          <div class="k">Median hourly pay</div><div class="v">${item.medianHourlyPay == null ? "—" : `${formatCurrency(item.medianHourlyPay)}/h`}</div>
+          <div class="k">Women share</div><div class="v">${formatPercent(item.womenShare)}</div>
+          <div class="k">Higher-education share</div><div class="v">${formatPercent(item.higherEducationShare)}</div>
+          <div class="k">P25 / P75 pay (${state.meta.payPeriod})</div><div class="v">${item.payP25 == null || item.payP75 == null ? "—" : `${formatCurrency(item.payP25)} / ${formatCurrency(item.payP75)}`}</div>
+        </div>
+      `;
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const x = Math.min(window.innerWidth - tooltipRect.width - 16, clientX + 16);
+      const y = Math.max(16, Math.min(window.innerHeight - tooltipRect.height - 16, clientY - 18));
+
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+      tooltip.classList.add("visible");
+    }
+
+    function setMode(mode) {
+      state.colorMode = mode;
+      document.querySelectorAll("#modeToggle button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.mode === mode);
+      });
+      updateLegend();
+      updateInsights();
+      draw();
+    }
+
+    async function boot() {
+      const response = await fetch("data.json");
+      if (!response.ok) {
+        throw new Error(`Failed to load data.json: ${response.status}`);
+      }
+
+      const payload = await response.json();
+      state.meta = payload.meta;
+      state.data = payload.occupations;
+
+      document.title = payload.meta.title;
+      loadingEl.remove();
+      updateStaticCards();
+      updateLegend();
+      updateInsights();
+      layout();
+      draw();
+    }
+
+    document.getElementById("modeToggle").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-mode]");
+      if (!button) return;
+      setMode(button.dataset.mode);
+    });
+
+    canvas.addEventListener("mousemove", (event) => {
+      const hit = hitTest(event.clientX, event.clientY);
+      if (hit !== state.hovered) {
+        state.hovered = hit;
+        draw();
+      }
+      updateTooltip(hit, event.clientX, event.clientY);
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      state.hovered = null;
+      tooltip.classList.remove("visible");
+      draw();
+    });
+
+    window.addEventListener("resize", () => {
+      state.dpr = window.devicePixelRatio || 1;
+      if (!state.data.length) return;
+      layout();
+      draw();
+    });
+
+    boot().catch((error) => {
+      loadingEl.textContent = error.message;
+      loadingEl.style.color = "#f29ca5";
+      console.error(error);
+    });
+  </script>
+</body>
+</html>

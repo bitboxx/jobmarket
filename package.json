@@ -1,0 +1,9 @@
+{
+  "name": "jobmarket-nl",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:data": "node scripts/fetch-cbs-data.mjs",
+    "serve": "python3 -m http.server 8000 -d site"
+  }
+}
