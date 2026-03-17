@@ -2,7 +2,7 @@
 
 A static, CBS-backed remake of [karpathy.ai/jobs](https://karpathy.ai/jobs/) for the Dutch labor market.
 
-![Netherlands Job Market Visualizer screenshot](assets/site.png)
+![Netherlands Job Market Visualizer screenshot](assets/screenshot.png)
 
 It renders a treemap of Dutch occupations using official CBS open data:
 
